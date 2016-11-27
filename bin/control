@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+source ${OPENSHIFT_CARTRIDGE_SDK_BASH}
+
+function start() {
+    service nginx start
+    service php-fpm start
+}
+
+
+function stop() {
+	service nginx stop
+    service php-fpm stop
+}
+
+function restart() {
+	service nginx stop
+    service php-fpm stop
+    service nginx start
+    service php-fpm start
+}
+
+function status() {
+	service nginx status
+    service php-fpm status
+}
+
+function build() {
+	service nginx build
+    service php-fpm build
+}
+
+function tidy() {
+    client_message "Emptying log dir: ${OPENSHIFT_PHP_DIR}/logs"
+    shopt -s dotglob
+    rm -rf logs/*
+}
+
+case "$1" in
+  start)	 start ;;
+  stop)      stop ;;
+  restart)   restart ;;
+  status)    status ;;
+  tidy)      tidy ;;
+  build)     build ;;
+  *)         exit 0
+esac

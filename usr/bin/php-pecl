@@ -1,0 +1,170 @@
+#!/bin/bash
+set -e
+
+CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PHP_BIN_DIR=${OPENSHIFT_PHP_DIR}/usr/bin
+BUILD_DIR="${OPENSHIFT_TMP_DIR}/pecl-build"
+
+function download_and_unpack() {
+    if [ -z "${1}" ] || [ -z "${2}" ]; then
+        echo "download_and_unpack: expected two arguments"
+        return 1
+    fi
+
+    local pkg=${1}
+    local pkg_url=${2}
+
+    # Determin the extraction directory
+    local extract_dir=''
+    if [ ! -z "${3}" ]; then
+        extract_dir="${3}"
+    else
+        local pkg_len=${#pkg}
+        if [[ "${pkg}" == *'.tar.gz' ]]; then
+            extract_len=$((pkg_len - 7))
+        elif [[ "${pkg}" == *'.tgz' ]]; then
+            extract_len=$((pkg_len - 4))
+        elif [[ "${pkg}" == *'.tar.bz2' ]]; then
+            extract_len=$((pkg_len - 8))
+        else
+            echo "ERROR: ${pkg} unknown extension."
+            exit -1
+        fi
+        extract_dir="${pkg:0:extract_len}"
+    fi
+
+    # Determin extract arguments
+    local extract_args=xfz
+    if [[ "${pkg}" == *'.tar.bz2' ]]; then
+        extract_args=xfj
+    fi
+
+    # Download the package
+    echo "Downloading ${pkg}:"
+    if [ ! -f "${pkg}" ] || [ ! -d "${extract_dir}" ]; then
+        wget --progress=dot --output-document=./${pkg} ${pkg_url}
+        echo "- done"
+    else
+        echo "- skipping file exists."
+    fi
+
+    # Check file (incase openshift hangsup)
+    echo "Unpacking ${pkg}:"
+    local check_file=`md5sum ${pkg} | awk '{ print $1 }'`
+    if [ -f ${check_file} ]; then
+        echo "- cleaning failure."
+        # We know extraction failed previously
+        # So remove that folder
+        rm -rf "${extract_dir}"
+    elif [ -d "${extract_dir}" ]; then
+        # The directory exists so don't extract again
+        echo "- skipping directory exists."
+        return 0
+    fi
+
+    # Extract
+    touch ${check_file}
+    tar ${extract_args} "${pkg}"
+
+    # Done so remove the check file
+    rm ${check_file}
+    echo "- done."
+
+    return 0
+}
+
+function check() {
+    if [ -z "${1}" ] || [ -z "${2}" ]; then
+        echo "check_pecl: expected two arguments <ext> <version>"
+        return 1
+    fi
+
+    local pecl_version=`${PHP_BIN_DIR}/php -r "echo phpversion('${1}');"`
+
+    if [[ ${2} != ${pecl_version} ]]; then
+        echo "PHP pecl ${1} not installed or old version ${pecl_version}."
+        install_pecl ${1} ${2} ${3}
+    else
+        echo "PHP pecl ${1} up to date, version: ${2}."
+    fi
+}
+
+function install() {
+	
+    if [ -z "${1}" ] || [ -z "${2}" ]; then
+        echo "check_pecl: expected two arguments <ext> <version>"
+        return 1
+    fi
+
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
+
+    local name=${1}-${2}
+    download_and_unpack ${name}.tgz http://pecl.php.net/get/${name}.tgz
+    pushd ${name}
+    
+    echo "Configuring ${1}."
+    ${PHP_BIN_DIR}/phpize
+    ./configure \
+    	--with-php-config=${PHP_BIN_DIR}/php-config \
+    	${3}
+    
+    echo "Compiling ${1}."
+    make install
+
+    popd
+    
+
+    echo "Cleaning build directory."
+    popd
+    rm -rf ${BUILD_DIR}
+
+	pushd ${OPENSHIFT_PHP_DIR}/conf/ext
+    rm -rf ${1}.ini
+    popd
+    
+    # Add extension to the php.ini
+    echo "extension=${1}.so" >> ${OPENSHIFT_PHP_DIR}/conf/ext/${1}.ini
+   
+    
+    PHP_FPM_EXT=${OPENSHIFT_PHP_DIR}/conf/ext/extension.ini
+    EXT_FILE=${OPENSHIFT_REPO_DIR}/.openshift/extension.ini.erb
+    if [ -f "${EXT_FILE}" ]; then
+        oo-erb ${EXT_FILE} > ${PHP_FPM_EXT}
+    else
+        oo-erb ${OPENSHIFT_PHP_EXTENSION_DIR}/extension.ini.erb > ${PHP_FPM_EXT}
+    fi
+    
+    service php-fpm restart
+}
+
+function uninstall() {
+    INI_FILE=${OPENSHIFT_PHP_DIR}/conf/ext/${1}.ini
+    if [ -f "${INI_FILE}" ]; then
+    	echo "Removing ${1} extension..."
+    	rm -rf ${OPENSHIFT_PHP_DIR}/conf/ext/${1}.ini
+    	rm -rf ${OPENSHIFT_PHP_DIR}/usr/ext/${1}.so
+    	rm -rf ${OPENSHIFT_PHP_DIR}/usr/include/php/ext/${1}/
+    	echo "Done!"
+    
+	PHP_FPM_EXT=${OPENSHIFT_PHP_DIR}/conf/ext/extension.ini
+    	EXT_FILE=${OPENSHIFT_REPO_DIR}/.openshift/extension.ini.erb
+    	if [ -f "${EXT_FILE}" ]; then
+        	oo-erb ${EXT_FILE} > ${PHP_FPM_EXT}
+    	else
+        	oo-erb ${OPENSHIFT_PHP_EXTENSION_DIR}/extension.ini.erb > ${PHP_FPM_EXT}
+    	fi
+    	
+    	service php-fpm restart
+    else
+    	echo "Error: ${1} extension is not installed."
+    fi
+}
+
+
+
+case "$1" in
+    install)    install $2 $3;;
+    uninstall)    uninstall $2;;
+    *)         exit 0
+esac

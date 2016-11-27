@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+source ${OPENSHIFT_CARTRIDGE_SDK_BASH}
+
+# Create dirs
+mkdir -p ${OPENSHIFT_PHP_DIR}/{pid,socket,run,ext,conf/ext}
+
+# Set version env variables
+echo "${OPENSHIFT_PHP_DIR}/usr/bin" > env/OPENSHIFT_PHP_PATH_ELEMENT
+echo "${OPENSHIFT_PHP_DIR}/usr/ext" > env/OPENSHIFT_PHP_EXTENSION_DIR
+
+# Create dirs
+dirs=( "logs" "run" )
+for dir in ${dirs[@]}; do
+    mkdir -p "${OPENSHIFT_PHP_DIR}/${dir}"
+done
+

@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Updater script for this cartridge
+MANIFEST_URL="http://cartreflect-claytondev.rhcloud.com/github/budisteikul/openshift-cartridge-nginx-php7"
+MANIFEST_PARSER="${OPENSHIFT_PHP_DIR}usr/bin/manifest.py"
+
+function check() {
+    echo "Checking for updates..."
+    
+    # Get remote cartridge version
+    wget -q -O /tmp/manifest_latest.yml $MANIFEST_URL
+    
+    eval $(python $MANIFEST_PARSER /tmp/manifest_latest.yml 'REMOTE_')
+    eval $(python $MANIFEST_PARSER ${OPENSHIFT_PHP_DIR}/usr/bin/manifest.yml 'LOCAL_')
+
+    if [ "$LOCAL_CARTRIDGE_VERSION" != "$REMOTE_CARTRIDGE_VERSION" ]; then
+    	echo "Cartridge ${REMOTE_CARTRIDGE_VERSION} is available"
+    	echo " > Nginx ${REMOTE_NGINX_VERSION}"
+    	echo " > PHP ${REMOTE_PHP_VERSION}"
+    	echo "Run \`update install\` to install updates."
+        echo "available" > /tmp/update_version
+    else
+    	echo "Your cartridge version is ${LOCAL_CARTRIDGE_VERSION} and already up to date."
+    fi
+    
+}
+
+function update_process() {
+		
+        wget -q -O /tmp/manifest_latest.yml $MANIFEST_URL
+        
+		URL="https://github.com/budisteikul/openshift-cartridge-nginx-php7/archive/master.tar.gz"
+		echo "Downloading binary.tar.gz..."
+        
+        wget -O /tmp/binary.tar.gz $URL
+        
+        # curl $URL -L > "/tmp/binary.tar.gz" --progress-bar
+
+        echo "Extracting binary.tar.gz..."
+        
+        if [ -d "/tmp/binary" ]; then
+            rm -rf "/tmp/binary"
+        fi
+
+        mkdir "/tmp/binary"
+        tar -xf "/tmp/binary.tar.gz" -C "/tmp/binary" --strip-components=1 --warning=no-timestamp
+
+        echo "Preparing to apply update..."
+        
+        service php-fpm stop
+        service nginx stop
+
+        echo "Applying update..."
+        if [ -d "/tmp/binary/usr/" ]; then
+        	rsync -a "/tmp/binary/usr/" ${OPENSHIFT_PHP_DIR}/usr/
+
+        	echo "Finishing update..."
+        	rm -rf "/tmp/binary"
+        	rm -f "/tmp/update_version"
+        	cp /tmp/manifest_latest.yml ${OPENSHIFT_PHP_DIR}/usr/bin/manifest.yml
+        	rm -f "/tmp/manifest_latest.yml"
+            
+            service nginx start
+        	service php-fpm start
+            echo "Update binary complete!"
+        else
+        	service nginx start
+        	service php-fpm start
+        	echo "Update failed, file binary corrupted!"
+        fi
+       
+}
+
+function force() {
+		update_process
+}
+
+function install() {
+    
+    if [ ! -f /tmp/update_version ]; then
+        echo "No updates available."
+        echo "Please run \`update check\` to check for updates"
+
+        return 0
+    fi
+
+    echo "You are updating binary to a new version."
+    echo "Make sure you have a backup just in case something gets wrong."
+
+    read -p "Proceed? [Y/n]: "
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        update_process
+    fi
+}
+
+case "$1" in
+    check)      check;;
+    install)    install;;
+    force)   	force;;
+    *)          check
+esac

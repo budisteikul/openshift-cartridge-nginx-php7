@@ -1,0 +1,10 @@
+#!/bin/bash
+
+${OPENSHIFT_PHP_DIR}/usr/sbin/nginx -v
+echo
+
+php --version
+echo
+
+composer --version
+echo

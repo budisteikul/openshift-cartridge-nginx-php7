@@ -1,0 +1,7 @@
+locked_files:
+- bin/
+- bin/*
+- env/
+- env/*
+setup_rewritten:
+- conf/*

@@ -1,0 +1,291 @@
+#!/bin/bash
+set -e
+
+# This is a psuedo /usr/bin/service
+# 
+# Usage:
+# $ service <name> <action> 
+
+source ${OPENSHIFT_CARTRIDGE_SDK_BASH}
+
+export STOPTIMEOUT=20
+export STARTTIMEOUT=20
+
+PHP_FPM_EXEC=${OPENSHIFT_PHP_DIR}/usr/sbin/php-fpm
+PHP_FPM_PID=${OPENSHIFT_PHP_DIR}/pid/php-fpm-${OPENSHIFT_GEAR_UUID}.pid
+PHP_FPM_CONFIG_FILE=${OPENSHIFT_PHP_DIR}/conf/php-fpm.conf
+PHP_FPM_EXT=${OPENSHIFT_PHP_DIR}/conf/ext/extension.ini
+PHP_CONFIG_FILE=${OPENSHIFT_PHP_DIR}/conf/php-fpm.ini
+
+
+NGINX_EXEC=${OPENSHIFT_PHP_DIR}/usr/sbin/nginx
+NGINX_CONFIG_FILE=${OPENSHIFT_PHP_DIR}/conf/nginx.conf
+NGINX_HTTP_CONFIG_FILE=${OPENSHIFT_PHP_DIR}/conf/nginx_http.conf
+
+name=$1
+action=$2
+
+function_name="${name}_${action}"
+
+function _nginx_start() {
+	if _is_running_nginx; then
+        _nginx_stop
+    fi
+
+    _nginx_update_conf
+    
+    if _has_config_nginx; then
+        ${NGINX_EXEC} -c ${NGINX_CONFIG_FILE} -p ${OPENSHIFT_PHP_DIR} 2>&1
+
+        if [ $? -ne 0 ]; then
+            echo "Error starting nginx"
+        elif ! _is_running_nginx; then
+            local TIMEOUT="${STARTTIMEOUT}"
+            while [ ${TIMEOUT} -gt 0 ] && [ ! -f "${OPENSHIFT_PHP_PID}" ]; do
+                sleep .5
+                let TIMEOUT=${TIMEOUT}-1
+            done
+        fi
+    fi
+    
+    _is_running_nginx && echo "Nginx instance is started"
+}
+
+function _php_start() {
+	
+    _php_update_conf
+    
+	# config
+
+    if ! _is_running_php; then
+
+        # Start php fpm
+        ${PHP_FPM_EXEC} \
+            --php-ini "${OPENSHIFT_PHP_DIR}/conf/php-fpm.ini" \
+            --fpm-config "${OPENSHIFT_PHP_DIR}/conf/php-fpm.conf" \
+            --prefix "${OPENSHIFT_PHP_DIR}"
+
+        _is_running_php && echo "PHP-FPM instance is started"
+    else
+        echo "PHP-FPM already running" 1>&2
+    fi
+}
+
+function _nginx_stop() {
+    [ -f "${OPENSHIFT_PHP_PID}" ] && pid=$( /bin/cat "${OPENSHIFT_PHP_PID}" )
+
+    # Check pid file
+    if `ps -p ${pid} > /dev/null 2>&1`; then
+        if _has_config_nginx; then
+            ${NGINX_EXEC} -c ${NGINX_CONFIG_FILE} -p ${OPENSHIFT_PHP_DIR} -s stop  2>&1
+        else
+            /bin/kill -9 ${pid}
+        fi
+
+        local ret=$?
+        if [ ${ret} -eq 0 ]; then
+            local TIMEOUT="${STOPTIMEOUT}"
+            while [ ${TIMEOUT} -gt 0 ] && [ -f "${OPENSHIFT_PHP_PID}" ]; do
+                /bin/kill -0 "${pid}" >/dev/null 2>&1 || break
+                sleep .5
+                let TIMEOUT=${TIMEOUT}-1
+            done
+        fi
+    else
+        local current_user=`id -u`
+        if `pgrep -x nginx -u ${current_user} > /dev/null 2>&1`
+        then
+            echo "Warning: Nginx process exists without a pid file. Use force-stop to kill."
+        else
+            echo "Nginx already stopped"
+        fi
+    fi
+    _is_running_nginx  ||  echo "Nginx instance is stopped"
+}
+
+
+function _php_stop() {
+	[ -f "${PHP_FPM_PID}" ] && pid=$( /bin/cat "${PHP_FPM_PID}" )
+    if `ps -p ${pid} > /dev/null 2>&1`; then
+        /bin/kill ${pid}
+        ret=$?
+        if [ ${ret} -eq 0 ]; then
+            TIMEOUT="${STOPTIMEOUT}"
+            while [ ${TIMEOUT} -gt 0 ] && [ -f "${PHP_FPM_PID}" ]; do
+                /bin/kill -0 "${pid}" >/dev/null 2>&1 || break
+                sleep .5
+                let TIMEOUT=${TIMEOUT}-1
+            done
+        fi
+    else
+        if `pgrep -x php-fpm > /dev/null 2>&1`
+        then
+            echo "Warning: PHP-FPM process exists without a pid file.  Use force-stop to kill." 1>&2
+        else
+            echo "PHP-FPM already stopped" 1>&2
+        fi
+    fi
+
+    ! _is_running_php && echo "PHP-FPM instance is stopped"
+}
+
+
+function _is_running_nginx() {
+    if [ -f "${OPENSHIFT_PHP_PID}" ]; then
+        local pid=`cat ${OPENSHIFT_PHP_PID} 2> /dev/null`
+        [ -z "${pid}" ]  &&  return 1
+
+        local current_user=`id -u`
+        if `ps --pid ${pid} > /dev/null 2>&1` || \
+           `pgrep -x nginx -u ${current_user} > /dev/null 2>&1`; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+function _is_running_php() {
+    if [ -f "${PHP_FPM_PID}" ]; then
+        local pid=`cat ${PHP_FPM_PID} 2> /dev/null`
+        [ -z "${pid}" ]  &&  return 1
+
+        local current_user=`id -u`
+        if `ps --pid ${pid} > /dev/null 2>&1` || \
+           `pgrep -x php-fpm -u ${current_user} > /dev/null 2>&1`; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+function _has_config_nginx() {
+    if [ ! -f "${NGINX_CONFIG_FILE}" ]; then
+        echo "Missing conf/nginx.conf in cartridge."
+        return 1
+    fi
+    if [ ! -f "${NGINX_HTTP_CONFIG_FILE}" ]; then
+        echo "Missing .openshift/nginx.conf.erb in repo."
+        return 1
+    fi
+
+    return 0
+}
+
+function _nginx_status() {
+    if _is_running_nginx; then
+        client_result "Nginx is running"
+    else
+        client_result "Nginx is stopped"
+    fi
+}
+
+function _php_status() {
+	if _is_running_php; then
+        client_result "PHP-FPM is running"
+    else
+        client_result "PHP-FPM is stopped"
+    fi
+}
+
+function _nginx_update_conf() {
+    CONF_FILE=${OPENSHIFT_REPO_DIR}/.openshift/nginx.conf.erb
+    oo-erb ${OPENSHIFT_PHP_DIR}/usr/conf/nginx.conf.erb > ${NGINX_CONFIG_FILE}
+    if [ -f "${CONF_FILE}" ]; then
+        oo-erb ${CONF_FILE} > ${NGINX_HTTP_CONFIG_FILE}
+    else
+    	oo-erb ${OPENSHIFT_PHP_DIR}/usr/conf/nginx_http.conf.erb > ${NGINX_HTTP_CONFIG_FILE}
+    fi
+}
+
+function _php_update_conf() {
+	
+    CONFIG_FILE=${OPENSHIFT_REPO_DIR}/.openshift/php-fpm.ini.erb
+    FPM_CONFIG_FILE=${OPENSHIFT_REPO_DIR}/.openshift/php-fpm.conf.erb
+    EXT_FILE=${OPENSHIFT_REPO_DIR}/.openshift/extension.ini.erb
+    
+    if [ -f "${FPM_CONFIG_FILE}" ]; then
+        oo-erb ${FPM_CONFIG_FILE} > ${PHP_FPM_CONFIG_FILE}
+    else
+        oo-erb ${OPENSHIFT_PHP_DIR}/usr/conf/php-fpm.conf.erb > ${PHP_FPM_CONFIG_FILE}
+    fi
+    
+    if [ -f "${CONFIG_FILE}" ]; then
+        oo-erb ${CONFIG_FILE} > ${PHP_CONFIG_FILE}
+    else
+        oo-erb ${OPENSHIFT_PHP_DIR}/usr/conf/php-fpm.ini.erb > ${PHP_CONFIG_FILE}
+    fi
+    
+    if [ -f "${EXT_FILE}" ]; then
+        oo-erb ${EXT_FILE} > ${PHP_FPM_EXT}
+    else
+        oo-erb ${OPENSHIFT_PHP_EXTENSION_DIR}/extension.ini.erb > ${PHP_FPM_EXT}
+    fi
+    
+    
+    # Install/Update composer
+	COMPOSER_PATH=${OPENSHIFT_PHP_DIR}/usr/bin/composer
+	if [ -f "${COMPOSER_PATH}" ]; then
+    	${COMPOSER_PATH} self-update --quiet
+	else
+    	pushd `dirname ${COMPOSER_PATH}`
+    	php -r "readfile('https://getcomposer.org/installer');" | php
+    	mv composer.phar "${COMPOSER_PATH}"
+    	popd
+	fi
+    
+    
+}
+
+# Service start and stop functions
+
+function php-fpm_start() {
+    echo "Starting PHP-FPM...";
+    _php_start
+}
+
+function php-fpm_stop() {
+    echo "Stopping PHP-FPM...";
+    _php_stop
+}
+
+function php-fpm_restart() {
+    php-fpm_stop; php-fpm_start
+}
+
+function php-fpm_build() {
+    _php_update_conf
+}
+
+function php-fpm_status() {
+    _php_status
+}
+
+function nginx_start() {
+    echo "Starting Nginx..."
+    _nginx_start
+}
+
+function nginx_stop() {
+    echo "Stopping Nginx...";
+    _nginx_stop
+}
+
+function nginx_restart() {
+    nginx_stop; nginx_start
+}
+
+function nginx_build() {
+    _nginx_update_conf
+}
+
+function nginx_status() {
+    _nginx_status
+}
+
+# Functions caller
+
+if $(declare -f -F $function_name > /dev/null); then
+    eval ${function_name}
+else
+    echo "Invalid service name and/or action"
+fi

@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+source ${OPENSHIFT_CARTRIDGE_SDK_BASH}
+
+# Install/Update composer
+COMPOSER_PATH=${OPENSHIFT_PHP_DIR}/usr/bin/composer
+if [ -f "${COMPOSER_PATH}" ]; then
+    ${COMPOSER_PATH} self-update
+else
+    pushd `dirname ${COMPOSER_PATH}`
+    php -r "readfile('https://getcomposer.org/installer');" | php
+    mv composer.phar "${COMPOSER_PATH}"
+    popd
+fi
+
+# Copy manifest file for update
+cp ${OPENSHIFT_PHP_DIR}/metadata/manifest.yml ${OPENSHIFT_PHP_DIR}/usr/bin/manifest.yml
+
+# Result for the client
+if [ "${OPENSHIFT_GEAR_DNS}" == "${OPENSHIFT_APP_DNS}" ]; then
+    client_result ""
+    client_result "Cartridge enviroment successfully installed."
+    client_result ""
+fi

@@ -1930,6 +1930,9 @@
 /* */
 /* #undef HAVE_TIDY */
 
+/* defined if tidybuffio.h exists */
+/* #undef HAVE_TIDYBUFFIO_H */
+
 /* */
 /* #undef HAVE_TIDYOPTGETDOC */
 
@@ -2161,7 +2164,7 @@
 /* #undef NO_MINUS_C_MINUS_O */
 
 /* The highest supported ODBC version */
-#define ODBCVER 0x0300
+#define ODBCVER 0x0350
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT ""
@@ -2196,17 +2199,11 @@
 /* */
 #define PHPDBG_DEBUG 0
 
-/* Whether the system supports BlowFish salt */
-#define PHP_BLOWFISH_CRYPT 1
-
 /* PHP build date */
-#define PHP_BUILD_DATE "2016-11-10"
+#define PHP_BUILD_DATE "2016-12-02"
 
 /* Define if your system has fork/vfork/CreateProcess */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
-
-/* Whether the system supports extended DES salt */
-#define PHP_EXT_DES_CRYPT 1
 
 /* fpm group name */
 #define PHP_FPM_GROUP "nobody"
@@ -2244,9 +2241,6 @@
 /* Whether you have IRIX-style functions */
 /* #undef PHP_IRIX_TIME_R */
 
-/* Whether the system supports MD5 salt */
-#define PHP_MD5_CRYPT 1
-
 /* */
 #define PHP_MHASH_BC 1
 
@@ -2277,17 +2271,8 @@
 /* whether pwrite64 is default */
 /* #undef PHP_PWRITE_64 */
 
-/* Whether the system supports SHA256 salt */
-#define PHP_SHA256_CRYPT 1
-
-/* Whether the system supports SHA512 salt */
-#define PHP_SHA512_CRYPT 1
-
 /* */
 #define PHP_SIGCHILD 0
-
-/* Whether the system supports standard DES salt */
-#define PHP_STD_DES_CRYPT 1
 
 /* uname -a output */
 #define PHP_UNAME "Linux openshift 2.6.32-042stab116.2 #1 SMP Fri Jun 24 15:33:57 MSK 2016 x86_64 x86_64 x86_64 GNU/Linux"
@@ -2446,7 +2431,7 @@
 #define ZEND_MM_ALIGNMENT_LOG2 3
 
 /* Use zend signal handling */
-/* #undef ZEND_SIGNALS */
+#define ZEND_SIGNALS 1
 
 /* */
 /* #undef ZTS */

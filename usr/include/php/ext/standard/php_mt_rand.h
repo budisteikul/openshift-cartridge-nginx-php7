@@ -12,32 +12,33 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Sascha Schumann <sascha@schumann.cx>                         |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Pedro Melo <melo@ip.pt>                                     |
+   |          Sterling Hughes <sterling@php.net>                          |
+   |                                                                      |
+   | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
-*/
-
+ */
 /* $Id$ */
 
-#ifndef PHP_LCG_H
-#define PHP_LCG_H
+#ifndef PHP_MT_RAND_H
+#define PHP_MT_RAND_H
 
-#include "ext/standard/basic_functions.h"
+#include "php_lcg.h"
+#include "php_rand.h"
 
-typedef struct {
-	int32_t s1;
-	int32_t s2;
-	int seeded;
-} php_lcg_globals;
+#define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
-PHPAPI double php_combined_lcg(void);
-PHP_FUNCTION(lcg_value);
+#define MT_RAND_MT19937 0
+#define MT_RAND_PHP 1
 
-PHP_MINIT_FUNCTION(lcg);
+PHPAPI void php_mt_srand(uint32_t seed);
+PHPAPI uint32_t php_mt_rand(void);
+PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
+PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
-#ifdef ZTS
-#define LCG(v) ZEND_TSRMG(lcg_globals_id, php_lcg_globals *, v)
-#else
-#define LCG(v) (lcg_globals.v)
-#endif
+PHP_MINIT_FUNCTION(mt_rand);
 
-#endif
+#endif	/* PHP_MT_RAND_H */
+

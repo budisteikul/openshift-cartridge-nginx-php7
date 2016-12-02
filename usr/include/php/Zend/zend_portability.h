@@ -125,6 +125,8 @@
 # define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
 
+#define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
+
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
@@ -284,7 +286,7 @@ char *alloca();
 #  endif
 # elif defined(_MSC_VER)
 #  define zend_always_inline __forceinline
-#  define zend_never_inline
+#  define zend_never_inline __declspec(noinline)
 # else
 #  if __has_attribute(always_inline)
 #   define zend_always_inline inline __attribute__((always_inline))

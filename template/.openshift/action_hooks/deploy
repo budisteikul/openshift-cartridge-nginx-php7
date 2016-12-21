@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Deploying...\n"
+echo "Deploying..."
 
 # Composer and automatically install dependencies on deploy.
 #

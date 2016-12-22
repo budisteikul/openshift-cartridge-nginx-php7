@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Deploying...\n"
+
+# Composer and automatically install dependencies on deploy.
+#
+; cd $OPENSHIFT_REPO_DIR; composer install

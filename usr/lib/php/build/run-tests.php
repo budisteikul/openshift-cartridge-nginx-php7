@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: ce11fb1d8781cf391117044e588addbbd7d17255 $ */
+/* $Id: 14a252b934eead5cadaf8e918c2a09f2f16ff768 $ */
 
 /* Sanity check to ensure that pcre extension needed by this script is available.
  * In the event it is not, print a nice error message indicating that this script will
@@ -122,16 +122,6 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 				$php_cgi = null;
 			}
 		}
-
-		if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
-			$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
-
-			if (file_exists($phpdbg)) {
-				putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
-			} else {
-				$phpdbg = null;
-			}
-		}
 	}
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
@@ -145,6 +135,23 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	}
 
 	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+}
+
+if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
+	if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
+		$phpdbg = realpath(dirname($php) . "/phpdbg.exe");
+	} elseif (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
+		$phpdbg = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg");
+	} elseif (file_exists("./sapi/phpdbg/phpdbg")) {
+		$phpdbg = realpath("./sapi/phpdbg/phpdbg");
+	} elseif (file_exists(dirname($php) . "/phpdbg")) {
+		$phpdbg = realpath(dirname($php) . "/phpdbg");
+	} else {
+		$phpdbg = null;
+	}
+	if ($phpdbg) {
+		putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
+	}
 }
 
 if (getenv('TEST_PHPDBG_EXECUTABLE')) {
@@ -658,7 +665,7 @@ if (isset($argc) && $argc > 1) {
 					$html_output = is_resource($html_file);
 					break;
 				case '--version':
-					echo '$Id: ce11fb1d8781cf391117044e588addbbd7d17255 $' . "\n";
+					echo '$Id: 14a252b934eead5cadaf8e918c2a09f2f16ff768 $' . "\n";
 					exit(1);
 
 				default:
@@ -1378,26 +1385,12 @@ TEST $file
 		if (isset($phpdbg)) {
 			$old_php = $php;
 			$php = $phpdbg . ' -qIb';
-		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
-			$old_php = $php;
-			$php = realpath(dirname($php) . "/phpdbg.exe") . ' -qIb ';
 		} else {
-			if (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
-				$old_php = $php;
-				$php = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg") . ' -qIb ';
-			} else if (file_exists("./sapi/phpdbg/phpdbg")) {
-				$old_php = $php;
-				$php = realpath("./sapi/phpdbg/phpdbg") . ' -qIb ';
-			} else if (file_exists(dirname($php) . "/phpdbg")) {
-				$old_php = $php;
-				$php = realpath(dirname($php) . "/phpdbg") . ' -qIb ';
-			} else {
-				show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
+			show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
 
-				junit_init_suite(junit_get_suitename_for($shortname));
-				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
-				return 'SKIPPED';
-			}
+			junit_init_suite(junit_get_suitename_for($shortname));
+			junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
+			return 'SKIPPED';
 		}
 	}
 

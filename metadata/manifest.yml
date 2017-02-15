@@ -4,10 +4,10 @@ Display-Name: Nginx and PHP
 License: MIT
 Version: "7"
 Versions:
-- 1.11.9
+- 1.11.10
 - 7.1.1
 Website: https://github.com/budisteikul/openshift-cartridge-nginx-php7
-Cartridge-Version: 5.4.1
+Cartridge-Version: 5.5.0
 Cartridge-Vendor: budisteikul
 Categories:
   - service

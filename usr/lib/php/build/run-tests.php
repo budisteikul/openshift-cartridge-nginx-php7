@@ -24,7 +24,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: 14a252b934eead5cadaf8e918c2a09f2f16ff768 $ */
+/* $Id: 77b95b25d3f657aa8d0dc9e83749f958f74b033a $ */
 
 /* Sanity check to ensure that pcre extension needed by this script is available.
  * In the event it is not, print a nice error message indicating that this script will
@@ -273,6 +273,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		$phpdbg_info = '';
 	}
 
+	if (function_exists('opcache_invalidate')) {
+		opcache_invalidate($info_file, true);
+	}
 	@unlink($info_file);
 
 	// load list of enabled extensions
@@ -293,6 +296,9 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		}
 	}
 
+	if (function_exists('opcache_invalidate')) {
+		opcache_invalidate($info_file, true);
+	}
 	@unlink($info_file);
 
 	// Write test context information.
@@ -564,7 +570,7 @@ if (isset($argc) && $argc > 1) {
 					$ini_overwrites[] = $argv[++$i];
 					break;
 				case 'g':
-					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);;
+					$SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);
 					break;
 				//case 'h'
 				case '--keep-all':
@@ -665,7 +671,7 @@ if (isset($argc) && $argc > 1) {
 					$html_output = is_resource($html_file);
 					break;
 				case '--version':
-					echo '$Id: 14a252b934eead5cadaf8e918c2a09f2f16ff768 $' . "\n";
+					echo '$Id: 77b95b25d3f657aa8d0dc9e83749f958f74b033a $' . "\n";
 					exit(1);
 
 				default:
@@ -1589,6 +1595,11 @@ TEST $file
 					$warn = true; /* only if there is a reason */
 					$info = " (warn: $m[1])";
 				}
+			}
+
+			if (!strncasecmp('xfail', ltrim($output), 5)) {
+				// Pretend we have an XFAIL section
+				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
 			}
 		}
 	}

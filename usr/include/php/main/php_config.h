@@ -555,10 +555,6 @@
    you don't. */
 #define HAVE_DECL_ARC4RANDOM_BUF 0
 
-/* Define to 1 if you have the declaration of `getrandom', and to 0 if you
-   don't. */
-#define HAVE_DECL_GETRANDOM 0
-
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 /* #undef HAVE_DECL_TZNAME */
@@ -1473,6 +1469,9 @@
 #define HAVE_RESOLV_H 1
 
 /* */
+/* #undef HAVE_RES_NDESTROY */
+
+/* */
 #define HAVE_RES_NSEARCH 1
 
 /* */
@@ -1953,7 +1952,7 @@
 #define HAVE_TM_ZONE 1
 
 /* Whether you have a working ttyname_r */
-/* #undef HAVE_TTYNAME_R */
+#define HAVE_TTYNAME_R 1
 
 /* Define to 1 if you don't have `tm_zone' but do have the external array
    `tzname'. */
@@ -2200,7 +2199,7 @@
 #define PHPDBG_DEBUG 0
 
 /* PHP build date */
-#define PHP_BUILD_DATE "2017-01-19"
+#define PHP_BUILD_DATE "2017-02-17"
 
 /* Define if your system has fork/vfork/CreateProcess */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1

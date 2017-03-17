@@ -285,7 +285,7 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib64 /lib64 /var/lib/openshift/php/cartridge/usr/libs/lib /usr/lib /lib "
+sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib64 /lib64 /usr/lib /lib "
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/pgsql-9.5/lib/ "
@@ -11795,7 +11795,7 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /var/lib/openshift/php/cartridge/usr/libs/lib /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
+compiler_lib_search_dirs="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
@@ -11806,7 +11806,7 @@ postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/var/lib/openshift/php/cartridge/usr/libs/lib -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
+compiler_lib_search_path="-L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
 
 # ### END LIBTOOL TAG CONFIG: CXX
 
@@ -12099,7 +12099,7 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /var/lib/openshift/php/cartridge/usr/libs/lib /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
+compiler_lib_search_dirs="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
@@ -12110,7 +12110,7 @@ postdeps="-lgfortranbegin -lgfortran -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/var/lib/openshift/php/cartridge/usr/libs/lib -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
+compiler_lib_search_path="-L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.."
 
 # ### END LIBTOOL TAG CONFIG: FC
 

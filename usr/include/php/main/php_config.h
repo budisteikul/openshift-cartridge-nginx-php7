@@ -555,6 +555,18 @@
    you don't. */
 #define HAVE_DECL_ARC4RANDOM_BUF 0
 
+/* Define to 1 if you have the declaration of `isfinite', and to 0 if you
+   don't. */
+#define HAVE_DECL_ISFINITE 1
+
+/* Define to 1 if you have the declaration of `isinf', and to 0 if you don't.
+   */
+#define HAVE_DECL_ISINF 1
+
+/* Define to 1 if you have the declaration of `isnan', and to 0 if you don't.
+   */
+#define HAVE_DECL_ISNAN 1
+
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 /* #undef HAVE_DECL_TZNAME */
@@ -960,15 +972,6 @@
 
 /* Define to 1 if you have the `isascii' function. */
 #define HAVE_ISASCII 1
-
-/* Define to 1 if you have the `isfinite' function. */
-/* #undef HAVE_ISFINITE */
-
-/* Define to 1 if you have the `isinf' function. */
-#define HAVE_ISINF 1
-
-/* Define to 1 if you have the `isnan' function. */
-#define HAVE_ISNAN 1
 
 /* */
 /* #undef HAVE_ISQLEXT_H */
@@ -2199,7 +2202,7 @@
 #define PHPDBG_DEBUG 0
 
 /* PHP build date */
-#define PHP_BUILD_DATE "2017-02-17"
+#define PHP_BUILD_DATE "2017-03-17"
 
 /* Define if your system has fork/vfork/CreateProcess */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
@@ -2507,33 +2510,33 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 /* To enable the is_nan, is_infinite and is_finite PHP functions */
 #ifdef NETWARE
-	#define HAVE_ISNAN 1
-	#define HAVE_ISINF 1
-	#define HAVE_ISFINITE 1
+	#define HAVE_DECL_ISNAN 1
+	#define HAVE_DECL_ISINF 1
+	#define HAVE_DECL_ISFINITE 1
 #endif
 
 #ifndef zend_isnan
-#ifdef HAVE_ISNAN
+#ifdef HAVE_DECL_ISNAN
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
 #else
-#define zend_isnan(a) 0
+#define zend_isnan(a) ((a) != (a))
 #endif
 #endif
 
-#ifdef HAVE_ISINF
+#ifdef HAVE_DECL_ISINF
 #define zend_isinf(a) isinf(a)
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY)?1:0)
+#define zend_isinf(a) (((a)==INFINITY || (a)==-INFINITY)?1:0)
 #elif defined(HAVE_FPCLASS)
 #define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
 #else
 #define zend_isinf(a) 0
 #endif
 
-#if defined(HAVE_ISFINITE) || defined(isfinite)
+#if defined(HAVE_DECL_ISFINITE)
 #define zend_finite(a) isfinite(a)
 #elif defined(HAVE_FINITE)
 #define zend_finite(a) finite(a)

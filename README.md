@@ -3,7 +3,7 @@
 
 ## What's inside
 
-* Nginx: 1.11.10
+* Nginx: 1.11.12
 * PHP: 7.1.3
 * Latest Composer
 

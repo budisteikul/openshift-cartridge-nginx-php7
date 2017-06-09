@@ -1342,6 +1342,9 @@
 /* Define to 1 if you have the `poll' function. */
 #define HAVE_POLL 1
 
+/* Define to 1 if you have the <poll.h> header file. */
+#define HAVE_POLL_H 1
+
 /* do we have port framework? */
 /* #undef HAVE_PORT */
 
@@ -2202,7 +2205,7 @@
 #define PHPDBG_DEBUG 0
 
 /* PHP build date */
-#define PHP_BUILD_DATE "2017-05-16"
+#define PHP_BUILD_DATE "2017-06-09"
 
 /* Define if your system has fork/vfork/CreateProcess */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1

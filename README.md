@@ -1,10 +1,10 @@
-# OPENSHIFT Nginx PHP 7 Cartridge
+#OPENSHIFT Nginx PHP 7 Cartridge
 <img src="https://raw.githubusercontent.com/budisteikul/openshift-cartridge-nginx-php7/master/usr/openshift-redhat.jpg"><br />Welcome to the world of [PHP-FPM](http://php.net/manual/en/book.fpm.php) within [OPENSHIFT](https://www.openshift.com/) by [REDHAT](https://www.redhat.com/en).
 
 ## What's inside
 
-* Nginx: 1.13.2
-* PHP: 7.1.6
+* Nginx: 1.13.3
+* PHP: 7.1.7
 * Latest Composer
 
 ## Installation

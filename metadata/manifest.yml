@@ -5,9 +5,9 @@ License: MIT
 Version: "7"
 Versions:
 - 1.13.3
-- 7.1.7
+- 7.1.8
 Website: https://github.com/budisteikul/openshift-cartridge-nginx-php7
-Cartridge-Version: 7.2.4
+Cartridge-Version: 7.2.5
 Cartridge-Vendor: budisteikul
 Categories:
   - service

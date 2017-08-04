@@ -10,7 +10,7 @@ php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
 \fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
 Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to /var/lib/openshift/php/cartridge/usr/log/php-fpm.log.
 .LP
-Most options are set in the configuration file. The configuration file is /var/lib/openshift/php/cartridge/usr/php-7.1.7/etc/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
+Most options are set in the configuration file. The configuration file is /var/lib/openshift/php/cartridge/usr/php-7.1.8/etc/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
 .SH OPTIONS
 .TP 15
 .B \-C
@@ -81,7 +81,7 @@ Version number
 .TP
 .PD 1
 .B \-p
-Specify alternative prefix path (the default is /var/lib/openshift/php/cartridge/usr/php-7.1.7)
+Specify alternative prefix path (the default is /var/lib/openshift/php/cartridge/usr/php-7.1.8)
 .TP
 .PD 0
 .B \-\-pid \fIfile\fP
@@ -95,7 +95,7 @@ Specify the PID file location.
 .TP
 .PD 1
 .B \-y
-Specify alternative path to FastCGI process manager configuration file (the default is /var/lib/openshift/php/cartridge/usr/php-7.1.7/etc/php-fpm.conf)
+Specify alternative path to FastCGI process manager configuration file (the default is /var/lib/openshift/php/cartridge/usr/php-7.1.8/etc/php-fpm.conf)
 .TP
 .PD 0
 .B \-\-test
@@ -211,7 +211,7 @@ A List of active developers can be found here:
 And last but not least PHP was developed with the help of a huge amount of 
 contributors all around the world.
 .SH VERSION INFORMATION
-This manpage describes \fBphp-fpm\fP, version 7.1.7.
+This manpage describes \fBphp-fpm\fP, version 7.1.8.
 .SH COPYRIGHT
 Copyright \(co 1997\-2016 The PHP Group
 .PD 0

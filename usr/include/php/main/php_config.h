@@ -1648,6 +1648,9 @@
 /* */
 #define HAVE_SQLITE3 1
 
+/* have sqlite3_errstr function */
+#define HAVE_SQLITE3_ERRSTR 1
+
 /* have commercial sqlite3 with crypto support */
 /* #undef HAVE_SQLITE3_KEY */
 
@@ -2205,7 +2208,7 @@
 #define PHPDBG_DEBUG 0
 
 /* PHP build date */
-#define PHP_BUILD_DATE "2017-08-03"
+#define PHP_BUILD_DATE "2017-09-01"
 
 /* Define if your system has fork/vfork/CreateProcess */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
